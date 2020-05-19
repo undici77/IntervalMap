@@ -3,7 +3,7 @@
 #include <map>
 #include <limits>
 
-#define ENABLE_OPTIMIZATION  0
+#define ENABLE_OPTIMIZATION  1
 
 template<typename K, typename V>
 class IntervalMap
@@ -25,8 +25,8 @@ class IntervalMap
 			typename std::map<K, V>::iterator it_begin_upper;
 			typename std::map<K, V>::iterator it_end_lower;
 			typename std::map<K, V>::iterator it_end_upper;
-			typename std::map<K, V>::iterator begin;
-			typename std::map<K, V>::iterator end;
+			typename std::map<K, V>::iterator it_begin;
+			typename std::map<K, V>::iterator it_end;
 
 			// Validating keys
 			if (key_begin >= key_end)
@@ -132,25 +132,25 @@ class IntervalMap
 			if (begin_previous_value == value)
 			{
 				it_begin_lower++;
-				begin = it_begin_lower;
+				it_begin = it_begin_lower;
 			}
 			else
 			{
-				begin = it_begin_upper;
+				it_begin = it_begin_upper;
 			}
 
 			// If next end key is equal to inserted value, delete also next key
 			if (end_next_value == value)
 			{
 				it_end_upper++;
-				end = it_end_upper;
+				it_end = it_end_upper;
 			}
 			else
 			{
-				end = it_end_lower;
+				it_end = it_end_lower;
 			}
 
-			_Map.erase(begin, end);
+			_Map.erase(it_begin, it_end);
 		}
 
 		V const &operator[](K const &key)

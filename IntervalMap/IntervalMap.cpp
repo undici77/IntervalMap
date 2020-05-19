@@ -7,10 +7,6 @@
 
 /*****************************************************************************/
 
-#define PROFILER            1
-
-/*****************************************************************************/
-
 #define ASSERT(v)           \
 	do       		        \
 	{				        \
@@ -49,8 +45,6 @@ int main()
 		}
 
 		memset(test_reference, '0', sizeof(test_reference));
-
-		//std::cout << "Interval: " << (size_t)key_interval << std::endl;
 
 		for (size_t test_id = 0; test_id < ((size_t)std::numeric_limits<KEY_TYPE>::max() * 32); test_id++)
 		{
