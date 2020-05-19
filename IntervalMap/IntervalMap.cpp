@@ -2,7 +2,14 @@
 #include <iostream>
 #include <time.h>
 
+#include "Profiler.h"
 #include "IntervalMap.h"
+
+/*****************************************************************************/
+
+#define PROFILER            1
+
+/*****************************************************************************/
 
 #define ASSERT(v)           \
 	do       		        \
@@ -11,12 +18,19 @@
 			__debugbreak();	\
 	} while(0)
 
+/*****************************************************************************/
+
 typedef uint8_t KEY_TYPE;
 typedef uint8_t VALUE_TYPE;
+
+/*****************************************************************************/
 
 int main()
 {
 	KEY_TYPE key_interval;
+
+	PROFILER_SETUP;
+	PROFILER_INIT;
 
 	key_interval = 0;
 	while (true)
@@ -29,14 +43,16 @@ int main()
 		key_interval++;
 		if (key_interval == 0)
 		{
+			PROFILER_TRIG("End Cycle");
+			PROFILER_INIT;
 			key_interval = 1;
 		}
 
 		memset(test_reference, '0', sizeof(test_reference));
 
-		std::cout << "Interval: " << (size_t)key_interval << std::endl;
+		//std::cout << "Interval: " << (size_t)key_interval << std::endl;
 
-		for (size_t test_id = 0; test_id < ((size_t)std::numeric_limits<KEY_TYPE>::max() * 8); test_id++)
+		for (size_t test_id = 0; test_id < ((size_t)std::numeric_limits<KEY_TYPE>::max() * 32); test_id++)
 		{
 			KEY_TYPE                                 begin_key;
 			KEY_TYPE                                 end_key;

@@ -3,6 +3,8 @@
 #include <map>
 #include <limits>
 
+#define ENABLE_OPTIMIZATION  0
+
 template<typename K, typename V>
 class IntervalMap
 {
@@ -15,10 +17,10 @@ class IntervalMap
 
 		void Assign(K const &key_begin, K const &key_end, V const &value)
 		{
-			V                                 begin_value;
-			V                                 end_value;
-			V                                 begin_previous_value;
-			V                                 end_next_value;
+			V begin_value;
+			V end_value;
+			V begin_previous_value;
+			V end_next_value;
 			typename std::map<K, V>::iterator it_begin_lower;
 			typename std::map<K, V>::iterator it_begin_upper;
 			typename std::map<K, V>::iterator it_end_lower;
@@ -26,20 +28,24 @@ class IntervalMap
 			typename std::map<K, V>::iterator begin;
 			typename std::map<K, V>::iterator end;
 
-
+			// Validating keys
 			if (key_begin >= key_end)
 			{
 				return;
 			}
 
+			// Getting begin key top reference
 			it_begin_lower = _Map.lower_bound(key_begin);
 
+			// Getting begin key value
 			it_begin_upper = _Map.upper_bound(key_begin);
 			it_begin_upper--;
 			begin_value = it_begin_upper->second;
 
+			// If begin key top reference is end, add new interval at the end of the map
 			if (it_begin_lower == _Map.end())
 			{
+				// Checking if value already exist
 				if (begin_value != value)
 				{
 					_Map[key_begin] = value;
@@ -49,15 +55,17 @@ class IntervalMap
 				return;
 			}
 
+			// Getting end key value
 			it_end_lower = _Map.lower_bound(key_end);
-
 			if (it_end_lower != _Map.begin())
 			{
 				it_end_lower--;
 			}
 
 			end_value = it_end_lower->second;
-
+			#if (ENABLE_OPTIMIZATION == 1)
+			// If begin value and end value are equal to new interval value
+			// simply expand current interval deleting intervals in the middle
 			if ((begin_value == value) && (end_value == value))
 			{
 				it_begin_upper++;
@@ -66,18 +74,23 @@ class IntervalMap
 
 				return;
 			}
+			#endif
 
+			// Getting previous begin key value
 			if (it_begin_lower != _Map.begin())
 			{
 				it_begin_lower--;
 			}
-
 			begin_previous_value = it_begin_lower->second;
 
-			it_end_upper =  _Map.upper_bound(key_end);
+			// Getting next end key value
+			it_end_upper = _Map.upper_bound(key_end);
 			it_end_upper--;
 			end_next_value = it_end_upper->second;
 
+			#if (ENABLE_OPTIMIZATION == 1)
+			// If previous begin value and next end value are equal to new interval value
+			// simply expand current interval deleting intervals in the middle
 			if ((begin_previous_value == value) && (end_next_value == value))
 			{
 				it_begin_lower++;
@@ -86,7 +99,10 @@ class IntervalMap
 
 				return;
 			}
+			#endif
 
+			// New interval involvs more than on interval, so add nel key if necessary
+			// and delete intervals in the middle
 			if (!((begin_value == value) || (begin_previous_value == value)))
 			{
 				_Map[key_begin] = value;
@@ -97,22 +113,22 @@ class IntervalMap
 				_Map[key_end] = end_value;
 			}
 
-			it_begin_upper    = _Map.upper_bound(key_begin);
-			it_end_lower      = _Map.lower_bound(key_end);
-
+			// Getting new boundaries
+			it_begin_upper = _Map.upper_bound(key_begin);
+			it_end_lower   = _Map.lower_bound(key_end);
 			it_begin_lower = _Map.lower_bound(key_begin);
 
 			if (it_begin_lower != _Map.begin())
 			{
 				it_begin_lower--;
 			}
-
 			begin_previous_value = it_begin_lower->second;
 
 			it_end_upper = _Map.upper_bound(key_end);
 			it_end_upper--;
 			end_next_value = it_end_upper->second;
 
+			// If previous begin key is equal to inserted value, delete also previous key
 			if (begin_previous_value == value)
 			{
 				it_begin_lower++;
@@ -123,6 +139,7 @@ class IntervalMap
 				begin = it_begin_upper;
 			}
 
+			// If next end key is equal to inserted value, delete also next key
 			if (end_next_value == value)
 			{
 				it_end_upper++;
